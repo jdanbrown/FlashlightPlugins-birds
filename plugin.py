@@ -27,21 +27,27 @@ def load_preferences():
         return json.load(f)
 
 
-def normalize_token(token):
-    return (token
-        .lower()
-        .translate({ord(c): None for c in string.punctuation})
-    )
-
-
+# Faster than pickle (empirically)
 def load_birds():
+    """Load birds with caching"""
+    try:
+        with open('cache/birds.json', 'rb') as f:
+            birds = json.load(f)
+    except:
+        birds = list(_load_birds_no_cache())
+        with open(ensure_parent_dir('cache/birds.json'), 'wb') as f:
+            json.dump(birds, f)
+    return birds
+
+
+def _load_birds_no_cache():
     fetch_ebird_taxa_if_missing()
     with io.open(ebird_taxa_csv_path, encoding='utf8') as f:
         for ebird in unicode_csv_dict_reader(f):
             yield dict(
                 ebird=ebird,
                 match_tokens=[
-                    # Normalize once across a concatenated token, for performance
+                    # Keep this string munging lightweight -- it can noticeably slow down response time very easily
                     normalize_token(' '.join([
                         ebird['COMMON_NAME'],  # e.g. "Wilson's Warbler"
                         ebird['SCIENTIFIC_NAME'],  # e.g. 'Cardellina pusilla'
@@ -55,16 +61,25 @@ def load_birds():
 def fetch_ebird_taxa_if_missing():
     if not os.path.exists(ebird_taxa_csv_path):
         content = urllib2.urlopen('http://ebird.org/ws1.1/ref/taxa/ebird?cat=species&fmt=csv').read()
-        os.system('mkdir -p %s' % pipes.quote(os.path.dirname(ebird_taxa_csv_path)))
-        with io.open(ebird_taxa_csv_path, 'w', encoding='utf8') as f:
+        with io.open(ensure_parent_dir(ebird_taxa_csv_path), 'w', encoding='utf8') as f:
             f.write(content.decode('utf8'))
+
+
+def normalize_token(token):
+    # Keep this string munging lightweight -- it can noticeably slow down response time very easily
+    return (token
+        .lower()
+        .replace("'", '')
+    )
 
 
 def results(fields, original_query):
 
+    # Uncomment for debugging
     # _log('fields: %s' % fields)
     # _log('original_query: %s' % original_query)
 
+    # Parse input
     query = fields['~query']
 
     # Load data
@@ -145,25 +160,40 @@ def results(fields, original_query):
         ),
     )
 
-    return {
-        'run_args': show_birds,
-        'title': 'bird search',
-        'html': html,
-    }
+    return dict(
+        title='birds',
+        html=html,
+        run_args=show_birds,
+    )
 
 
 def run(*birds):
     if birds:
         bird = birds[0]
         preferences = load_preferences()
-        if preferences['audubon.org']:
-            os.system('open %s' % pipes.quote(audubon_url(bird)))
-        if preferences['allaboutbirds.org']:
-            os.system('open %s' % pipes.quote(allaboutbirds_url(bird)))
-        if preferences['ebird.org/map']:
-            os.system('open %s' % pipes.quote(ebird_map_url(bird)))
-        if preferences['xeno-canto.org']:
-            os.system('open %s' % pipes.quote(xeno_canto_url(bird)))
+        # Open from least to most interesting, so that the most interesting browser tab/window is visible by default
+        for key, url_f in reversed([
+            ('xeno-canto.org', xeno_canto_url),
+            ('ebird.org/map', ebird_map_url),
+            ('allaboutbirds.org', allaboutbirds_url),
+            ('audubon.org', audubon_url),
+        ]):
+            if preferences[key]:
+                os.system('open %s' % pipes.quote(url_f(bird)))
+
+
+def xeno_canto_url(bird):
+    # view=3 - "sonograms" view instead of default "detailed" view
+    return 'https://www.xeno-canto.org/species/%s?view=3' % (
+        bird['_sciname']
+        .replace(" ", '-')
+    )
+
+
+def ebird_map_url(bird):
+    return 'http://ebird.org/map/%s' % (
+        bird['_species_code']
+    )
 
 
 def allaboutbirds_url(bird):
@@ -183,22 +213,17 @@ def audubon_url(bird):
     )
 
 
-def ebird_map_url(bird):
-    return 'http://ebird.org/map/%s' % (
-        bird['_species_code']
-    )
-
-
-def xeno_canto_url(bird):
-    # view=3 - "sonograms" view instead of default "detailed" view
-    return 'https://www.xeno-canto.org/species/%s?view=3' % (
-        bird['_sciname']
-        .replace(" ", '-')
-    )
-
-
 def title_case(s):
     return ' '.join(word[0].upper() + word[1:] for word in s.split())
+
+
+def ensure_parent_dir(path):
+    mkdir_p(os.path.dirname(path))
+    return path
+
+
+def mkdir_p(dir):
+    os.system('mkdir -p %s' % pipes.quote(dir))
 
 
 # To view logs, use FlashlightTool app (http://flashlighttool.42pag.es/)

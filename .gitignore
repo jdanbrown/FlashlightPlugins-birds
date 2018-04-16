@@ -1,1 +1,5 @@
+# Python
 *.py[co]
+
+# App
+cache/

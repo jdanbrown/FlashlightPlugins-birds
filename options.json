@@ -6,13 +6,8 @@
 		},
 		{
 			"type": "checkmark",
-			"text": "audubon.org",
-			"key": "audubon.org"
-		},
-		{
-			"type": "checkmark",
-			"text": "allaboutbirds.org",
-			"key": "allaboutbirds.org"
+			"text": "xeno-canto.org",
+			"key": "xeno-canto.org"
 		},
 		{
 			"type": "checkmark",
@@ -21,8 +16,13 @@
 		},
 		{
 			"type": "checkmark",
-			"text": "xeno-canto.org",
-			"key": "xeno-canto.org"
+			"text": "allaboutbirds.org",
+			"key": "allaboutbirds.org"
+		},
+		{
+			"type": "checkmark",
+			"text": "audubon.org",
+			"key": "audubon.org"
 		}
 	]
 }
