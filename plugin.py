@@ -15,6 +15,7 @@ import json
 import os
 import os.path
 import pipes
+import string
 import sys
 import urllib2
 
@@ -26,18 +27,27 @@ def load_preferences():
         return json.load(f)
 
 
+def normalize_token(token):
+    return (token
+        .lower()
+        .translate({ord(c): None for c in string.punctuation})
+    )
+
+
 def load_birds():
     fetch_ebird_taxa_if_missing()
     with io.open(ebird_taxa_csv_path, encoding='utf8') as f:
         for ebird in unicode_csv_dict_reader(f):
             yield dict(
                 ebird=ebird,
-                # codes=codes,
                 match_tokens=[
-                    ebird['COMMON_NAME'].lower(),  # e.g. "Wilson's Warbler"
-                    ebird['SCIENTIFIC_NAME'].lower(),  # e.g. 'Cardellina pusilla'
-                    ebird['BANDING_CODES'].lower(),  # e.g. 'WIWA'
-                    ebird['SPECIES_CODE'].lower(),  # e.g. 'wlswar'
+                    # Normalize once across a concatenated token, for performance
+                    normalize_token(' '.join([
+                        ebird['COMMON_NAME'],  # e.g. "Wilson's Warbler"
+                        ebird['SCIENTIFIC_NAME'],  # e.g. 'Cardellina pusilla'
+                        ebird['BANDING_CODES'],  # e.g. 'WIWA'
+                        ebird['SPECIES_CODE'],  # e.g. 'wlswar'
+                    ])),
                 ],
             )
 
@@ -61,7 +71,7 @@ def results(fields, original_query):
     birds = load_birds()
 
     # Filter birds to ones that match tokens from `query`
-    query_tokens = query.lower().split()
+    query_tokens = normalize_token(query).split()
     matched_birds = []
     for bird in birds:
         if all(
