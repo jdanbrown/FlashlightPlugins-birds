@@ -1,0 +1,9 @@
+{
+    "name": "birds",
+    "displayName": "Birds",
+    "description": "Various info on bird species",
+    "examples": ["bird wilson warb", "b wilson warb"],
+    "categories": ["Information"],
+    "creator_name": "Dan Brown",
+    "creator_url": "http://example.com"
+}

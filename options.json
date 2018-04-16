@@ -1,0 +1,28 @@
+{
+	"options": [
+		{
+			"type": "hint",
+			"text": "Which URLs to open when you press Enter:"
+		},
+		{
+			"type": "checkmark",
+			"text": "audubon.org",
+			"key": "audubon.org"
+		},
+		{
+			"type": "checkmark",
+			"text": "allaboutbirds.org",
+			"key": "allaboutbirds.org"
+		},
+		{
+			"type": "checkmark",
+			"text": "ebird.org/map",
+			"key": "ebird.org/map"
+		},
+		{
+			"type": "checkmark",
+			"text": "xeno-canto.org",
+			"key": "xeno-canto.org"
+		}
+	]
+}
