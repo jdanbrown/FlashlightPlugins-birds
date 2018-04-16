@@ -104,7 +104,8 @@ def results(fields, original_query):
         [
             OrderedDict([
                 ('name', bird['ebird']['COMMON_NAME']),
-                ('code', bird['ebird']['BANDING_CODES']),
+                ('banding code', bird['ebird']['BANDING_CODES']),
+                ('species code', bird['ebird']['SPECIES_CODE']),
                 ('sciname', bird['ebird']['SCIENTIFIC_NAME']),
                 # Not for display
                 ('_commonname', bird['ebird']['COMMON_NAME']),
@@ -174,6 +175,7 @@ def run(*birds):
         # Open from least to most interesting, so that the most interesting browser tab/window is visible by default
         for key, url_f in reversed([
             ('xeno-canto.org', xeno_canto_url),
+            ('peterson-field-guide', peterson_field_guide_url),
             ('ebird.org/map', ebird_map_url),
             ('allaboutbirds.org', allaboutbirds_url),
             ('audubon.org', audubon_url),
@@ -184,9 +186,16 @@ def run(*birds):
 
 def xeno_canto_url(bird):
     # view=3 - "sonograms" view instead of default "detailed" view
-    return 'https://www.xeno-canto.org/species/%s?view=3' % (
+    # order=dt&dir=1 - sort by "date" reverse
+    return 'https://www.xeno-canto.org/species/%s?view=3&order=dt&dir=1' % (
         bird['_sciname']
         .replace(" ", '-')
+    )
+
+
+def peterson_field_guide_url(bird):
+    return 'https://academy.allaboutbirds.org/peterson-field-guide-to-bird-sounds/?speciesCode=%s' % (
+        bird['_species_code']
     )
 
 

@@ -6,22 +6,27 @@
 		},
 		{
 			"type": "checkmark",
-			"text": "xeno-canto.org",
+			"text": "xeno-canto.org/species/...",
 			"key": "xeno-canto.org"
 		},
 		{
 			"type": "checkmark",
-			"text": "ebird.org/map",
+			"text": "academy.allaboutbirds.org/peterson-field-guide-to-bird-sounds/...",
+			"key": "peterson-field-guide"
+		},
+		{
+			"type": "checkmark",
+			"text": "ebird.org/map/...",
 			"key": "ebird.org/map"
 		},
 		{
 			"type": "checkmark",
-			"text": "allaboutbirds.org",
+			"text": "allaboutbirds.org/guide/...",
 			"key": "allaboutbirds.org"
 		},
 		{
 			"type": "checkmark",
-			"text": "audubon.org",
+			"text": "audubon.org/field-guide/bird/...",
 			"key": "audubon.org"
 		}
 	]
